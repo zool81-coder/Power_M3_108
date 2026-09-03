@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Power M3–108</string>
+    <string name="stroka_2">Измерение Р:</string>
+    <string name="stroka_hint1">Введите коэффициент</string>
+    <string name="stroka_tablo_pribora">2.0</string>
+    <string name="minus_0_1">Убав 0,1</string>
+    <string name="plus_0_1">Приб 0,1</string>
+    <string name="Record_and_send">Записать и отправить</string>
+    <string name="clear_tab">Очистить таблицу</string>
+    <string name="tab_num_1">КИУ № 1</string>
+    <string name="_2_5">2.5</string>
+    <string name="front_panel">Передняя панель</string>
+    <string name="front_display">экран прибора</string>
+    <string name="field_for_avg_power">поле для определения средней мощности</string>
+    <string name="field_borehole">скважность</string>
+</resources>

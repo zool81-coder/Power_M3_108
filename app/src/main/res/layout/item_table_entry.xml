@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#E8F5E9"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:padding="10dp">
+
+    <TextView
+        android:id="@+id/tvTableName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Таблица № 1"
+        android:textColor="#000000"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <Button
+        android:id="@+id/btnEditTable"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Изм."
+        android:textAllCaps="false"
+        android:textSize="12sp" />
+
+    <Button
+        android:id="@+id/btnDeleteTable"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="6dp"
+        android:text="Удал."
+        android:textAllCaps="false"
+        android:textSize="12sp" />
+</LinearLayout>
