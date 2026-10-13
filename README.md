@@ -1,27 +1,66 @@
 # PowerM3108
 
-Android‑приложение Калькулятор мощности с таблицей результатов.
+[License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+[Platform](https://img.shields.io/badge/platform-Android-green.svg)
 
----
+**PowerM3108** — Android-приложение «Калькулятор мощности» с таблицей результатов.
 
-## Скриншот главного экрана
+## Возможности
+
+- Расчёт мощности.
+- Таблица результатов вычислений.
+
+## Скриншот
 
 ![Скриншот главного экрана](docs/screenshots/main-screen.png)
 
-Это главный экран приложения Power M3-108.
+Главный экран приложения Power M3-108.
 
-## ⚠️ Важное предупреждение по сборке
+## Сборка
 
-Из‑за проблем с доступом к `dl.google.com` (актуально для ряда регионов) сборка требует **локального репозитория** с артефактом `aapt2`. Это временное техническое решение, чтобы проект собирался без сбоев.
+Требуется [Android Studio](https://developer.android.com/studio) и JDK 17.
+Gradle Wrapper уже включён в проект (отдельная установка Gradle не нужна).
 
-**Папка `local-repo` намеренно не хранится в Git** — она добавлена в `.gitignore`. Без неё сборка завершится ошибкой вида:
-> Could not find aapt2-9.1.0-14792394-windows.jar
+1. Склонируйте репозиторий:
+    # GitVerse
+   git clone [<URL-репозитория>](https://gitverse.ru/zoolbazuzu/Clock_Counter.git)
+    
+    # GitHub (зеркало)
+    git clone https://github.com/zool81-coder/Clock_Counter.git
 
----
+2. Перейдите в папку проекта:
 
-## 🚀 Быстрый старт (если всё уже настроено)
+   cd PowerM3108
 
-Если у тебя уже есть папка `local-repo` и ты просто хочешь собрать проект:
+3. Соберите приложение:
 
-```bash
-./gradlew clean assembleDebug
+   # Windows (PowerShell)
+   .\gradlew.bat assembleDebug
+
+   # Linux/macOS
+   ./gradlew assembleDebug
+
+APK появится в `app/build/outputs/apk/debug/`.
+
+## Запуск в Android Studio
+
+1. Откройте проект в Android Studio (**Open** → папка `PowerM3108`).
+2. Дождитесь синхронизации Gradle.
+3. Подключите устройство или запустите эмулятор.
+4. Нажмите **Run** (`Shift + F10`).
+
+## Тестирование
+
+    ./gradlew test   # unit-тесты
+    ./gradlew lint   # проверка линтером
+
+## Лицензия
+
+Проект распространяется под лицензией [MIT](LICENSE).
+
+## Автор
+
+Степанов Алексей Александрович
+
+- GitVerse: https://gitverse.ru/ZOOLBAZUZU
+- GitHub: https://github.com/zool81-coder
