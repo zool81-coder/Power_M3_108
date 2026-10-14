@@ -22,11 +22,12 @@
 Gradle Wrapper уже включён в проект (отдельная установка Gradle не нужна).
 
 1. Склонируйте репозиторий:
-    # GitVerse
-   git clone [<URL-репозитория>](https://gitverse.ru/zoolbazuzu/Clock_Counter.git)
-    
-    # GitHub (зеркало)
-    git clone https://github.com/zool81-coder/Clock_Counter.git
+
+   # GitVerse
+   git clone https://gitverse.ru/zoolbazuzu/Power_M3-108.git
+
+   # GitHub (зеркало)
+   git clone https://github.com/zool81-coder/Power_M3_108.git
 
 2. Перейдите в папку проекта:
 
