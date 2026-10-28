@@ -2,18 +2,18 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#E8F5E9"
+    android:background="@color/surface_panel_light"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:padding="10dp">
+    android:padding="12dp">
 
     <TextView
         android:id="@+id/tvTableName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="Таблица № 1"
-        android:textColor="#000000"
+        android:text="КИУ № 1"
+        android:textColor="@color/text_primary"
         android:textSize="16sp"
         android:textStyle="bold" />
 
@@ -21,8 +21,10 @@
         android:id="@+id/btnEditTable"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Изм."
+        android:background="@drawable/ripple_btn_coarse"
+        android:text="@string/dlg_edit"
         android:textAllCaps="false"
+        android:textColor="@color/accent_cyan"
         android:textSize="12sp" />
 
     <Button
@@ -30,7 +32,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="6dp"
-        android:text="Удал."
+        android:background="@drawable/ripple_btn_secondary"
+        android:text="@string/dlg_delete"
         android:textAllCaps="false"
+        android:textColor="@color/text_secondary"
         android:textSize="12sp" />
 </LinearLayout>

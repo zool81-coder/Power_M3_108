@@ -1,8 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-    <color name="colorblu_1">#0B216B</color>
-    <color name="colorblu_2">#ED0A1457</color>
+    <!-- Фон -->
+    <color name="bg_primary">#04070D</color>
+    <color name="bg_secondary">#0B1524</color>
 
+    <!-- Поверхности / панели -->
+    <color name="surface_panel">#1A2636</color>
+    <color name="surface_panel_light">#223449</color>
+    <color name="surface_glass">#B3142838</color>
+    <color name="surface_display_red">#1E060C</color>
+
+    <!-- Неоновые акценты -->
+    <color name="accent_cyan">#00E5FF</color>
+    <color name="accent_emerald">#00FFA3</color>
+    <color name="accent_amber">#FFB300</color>
+    <color name="accent_red">#FF2D55</color>
+    <color name="accent_red_light">#FF5C78</color>
+
+    <!-- Текст -->
+    <color name="text_primary">#E8F4FF</color>
+    <color name="text_secondary">#7A93A8</color>
+    <color name="text_on_accent">#02120F</color>
+    <color name="led_display">#D8FBFF</color>
+    <color name="led_red">#FFD8E0</color>
+
+    <!-- Таблица -->
+    <color name="table_header_bg">#14283A</color>
+    <color name="table_header_text">#AEE8FF</color>
+    <color name="table_row_bg">#0DFFFFFF</color>
+    <color name="table_row_active_bg">#2900E5FF</color>
+    <color name="table_row_active_bar">#00E5FF</color>
+    <color name="table_value_meter">#FFB3C1</color>
+    <color name="table_title_bg">#1200E5FF</color>
+
+    <!-- Обводки -->
+    <color name="stroke_neon">#1A00E5FF</color>
+    <color name="stroke_red">#40FF2D55</color>
+    <color name="stroke_subtle">#227A93A8</color>
+
+    <!-- Базовые -->
+    <color name="black">#000000</color>
+    <color name="white">#FFFFFF</color>
 </resources>

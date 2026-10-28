@@ -1,67 +1,46 @@
 # PowerM3108
 
-[License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-[Platform](https://img.shields.io/badge/platform-Android-green.svg)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-Android-green.svg)]()
 
-**PowerM3108** — Android-приложение «Калькулятор мощности» с таблицей результатов.
+**Power M3-108** — Android-приложение «Калькулятор мощности» для прибора М3-108.
+Рассчитывает среднюю и импульсную мощность, ведёт таблицу результатов и
+экспортирует её в Excel-совместимый файл.
 
-## Возможности
+## Возможности v2.0
 
-- Расчёт мощности.
-- Таблица результатов вычислений.
+- 🖥️ **Красное неоновое табло** прибора в стиле HUD.
+- ⚡ **Расчёт мощности**: `P_ср = коэффициент × показание`, `P_имп = P_ср × Q`.
+- 🎛️ **Скважность Q**: ручной ввод, грубая (±0,1) и точная (±0,01) регулировка,
+  кнопка-пресет `Q` (переключение `16 ⇄ 10`).
+- 📊 **Таблица 6 строк** с колонками `№ Л | Коэфф. | М3-108 | P средн. | P имп.`
+- 🔢 **Переключение нумерации** строк: `1–6 ⇄ 7–12` (тап по «№ Л»).
+- 🗂️ **Несколько таблиц** («КИУ № N»): добавление, переименование, удаление,
+  выбор из выпадающего списка.
+- 📤 **Экспорт в Excel**-совместимый HTML + отправка через системное меню.
+- 🔋 Автосохранение всех данных в `SharedPreferences`.
+- 🧪 Юнит-тесты расчёта (`PowerCalculatorTest`).
 
 ## Скриншот
 
 ![Скриншот главного экрана](docs/screenshots/main-screen.png)
 
-Главный экран приложения Power M3-108.
-
 ## Сборка
 
 Требуется [Android Studio](https://developer.android.com/studio) и JDK 17.
-Gradle Wrapper уже включён в проект (отдельная установка Gradle не нужна).
+Gradle Wrapper включён в проект.
 
-1. Склонируйте репозиторий:
+```bash
+# GitVerse
+git clone https://gitverse.ru/zoolbazuzu/Power_M3-108.git
 
-   # GitVerse
-   git clone https://gitverse.ru/zoolbazuzu/Power_M3-108.git
+# GitHub (зеркало)
+git clone https://github.com/zool81-coder/Power_M3_108.git
 
-   # GitHub (зеркало)
-   git clone https://github.com/zool81-coder/Power_M3_108.git
+cd PowerM3108
 
-2. Перейдите в папку проекта:
+# Windows (PowerShell)
+./gradlew.bat assembleDebug
 
-   cd PowerM3108
-
-3. Соберите приложение:
-
-   # Windows (PowerShell)
-   .\gradlew.bat assembleDebug
-
-   # Linux/macOS
-   ./gradlew assembleDebug
-
-APK появится в `app/build/outputs/apk/debug/`.
-
-## Запуск в Android Studio
-
-1. Откройте проект в Android Studio (**Open** → папка `PowerM3108`).
-2. Дождитесь синхронизации Gradle.
-3. Подключите устройство или запустите эмулятор.
-4. Нажмите **Run** (`Shift + F10`).
-
-## Тестирование
-
-    ./gradlew test   # unit-тесты
-    ./gradlew lint   # проверка линтером
-
-## Лицензия
-
-Проект распространяется под лицензией [MIT](LICENSE).
-
-## Автор
-
-Степанов Алексей Александрович
-
-- GitVerse: https://gitverse.ru/ZOOLBAZUZU
-- GitHub: https://github.com/zool81-coder
+# Linux/macOS
+./gradlew assembleDebug

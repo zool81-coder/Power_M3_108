@@ -1,9 +1,37 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
     <style name="Base.Theme.PowerM3108" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="colorPrimary">@color/accent_cyan</item>
+        <item name="colorOnPrimary">@color/text_on_accent</item>
+        <item name="colorSecondary">@color/accent_emerald</item>
+        <item name="colorOnSecondary">@color/text_on_accent</item>
+        <item name="colorSurfaceVariant">@color/surface_panel_light</item>
+        <item name="colorOnSurfaceVariant">@color/text_secondary</item>
+
+        <item name="android:colorBackground">@color/bg_primary</item>
+        <item name="android:windowBackground">@color/bg_primary</item>
+        <item name="colorSurface">@color/surface_panel</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+
+        <item name="android:statusBarColor">@color/bg_primary</item>
+        <item name="android:navigationBarColor">@color/bg_primary</item>
+        <item name="android:windowLightStatusBar">false</item>
+
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
     </style>
 
     <style name="Theme.PowerM3108" parent="Base.Theme.PowerM3108" />
+
+    <!-- Тёмная тема для диалогов (не зависит от системной темы) -->
+    <style name="Theme.PowerM3108.Dialog" parent="ThemeOverlay.Material3.Dark">
+        <item name="colorSurface">@color/surface_panel</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+        <item name="colorPrimary">@color/accent_cyan</item>
+        <item name="colorOnPrimary">@color/text_on_accent</item>
+        <item name="colorSecondary">@color/accent_emerald</item>
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+        <item name="android:colorBackground">@color/surface_panel</item>
+        <item name="android:windowBackground">@color/surface_panel</item>
+    </style>
 </resources>

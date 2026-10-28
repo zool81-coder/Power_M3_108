@@ -1,16 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Power M3–108</string>
-    <string name="stroka_2">Измерение Р:</string>
-    <string name="stroka_hint1">Введите коэффициент</string>
-    <string name="stroka_tablo_pribora">2.0</string>
-    <string name="minus_0_1">Убав 0,1</string>
-    <string name="plus_0_1">Приб 0,1</string>
+    <string name="app_subtitle">Power calculator · v2.0</string>
+
+    <!-- Табло прибора -->
+    <string name="display_label">ВАТТМЕТР ПОГЛОЩАЕМОЙ МОЩНОСТИ</string>
+    <string name="meter_name">М3-108</string>
+    <string name="_2_5">2.50</string>
+
+    <!-- Мощности -->
+    <string name="p_avg">P средняя</string>
+    <string name="p_pulse">P импульс</string>
+    <string name="unit_kw">кВт</string>
+
+    <!-- Управление показанием -->
+    <string name="reading_control_title">Показание прибора</string>
+    <string name="reading_control_hint">грубо ±0,1 · точно ±0,01</string>
+
+    <!-- Скважность Q -->
+    <string name="q_title">Скважность Q</string>
+    <string name="q_down_coarse">−</string>
+    <string name="q_down_fine">−</string>
+    <string name="q_up_fine">+</string>
+    <string name="q_up_coarse">+</string>
+    <string name="q_preset_hint">нажми Q — режим КИУ (Q=16) ⇄ УВ (Q=10)</string>
+
+    <!-- Таблица -->
+    <string name="tab_num_1">КИУ № 1</string>
+    <string name="header_num">№ Л</string>
+    <string name="header_coeff">Коэфф.</string>
+    <string name="header_meter">М3-108</string>
+    <string name="header_avg">P средн.</string>
+    <string name="header_pulse">P имп.</string>
+    <string name="num_toggle_hint">тап: 1–6 ⇄ 7–12</string>
+
+    <!-- Кнопки -->
     <string name="Record_and_send">Записать и отправить</string>
     <string name="clear_tab">Очистить таблицу</string>
-    <string name="tab_num_1">КИУ № 1</string>
-    <string name="_2_5">2.5</string>
-    <string name="front_panel">Передняя панель</string>
-    <string name="front_display">экран прибора</string>
-    <string name="field_for_avg_power">поле для определения средней мощности</string>
-    <string name="field_borehole">скважность</string>
+
+    <!-- Диалоги -->
+    <string name="dlg_tables">Таблицы</string>
+    <string name="dlg_add_title">Добавить новый</string>
+    <string name="dlg_rename_title">Изменить номер</string>
+    <string name="dlg_delete_title">Удаление</string>
+    <string name="dlg_add_hint">Введите номер</string>
+    <string name="dlg_close">Закрыть</string>
+    <string name="dlg_ok">OK</string>
+    <string name="dlg_cancel">Отмена</string>
+    <string name="dlg_yes">Да</string>
+    <string name="dlg_no">Нет</string>
+    <string name="dlg_edit">Изм.</string>
+    <string name="dlg_delete">Удал.</string>
+    <string name="dlg_add_new">+ Добавить новый</string>
+    <string name="dlg_delete_last">Нельзя удалить последнюю таблицу</string>
+    <string name="dlg_dup">Такой номер уже существует</string>
+    <string name="dlg_empty">Номер таблицы пустой</string>
+    <string name="dlg_renamed">Номер изменён</string>
+    <string name="dlg_deleted">Таблица удалена</string>
+
+    <!-- Тост и прочее -->
+    <string name="toast_q_negative">Q не может быть меньше нуля</string>
+    <string name="toast_table_cleared">Таблица очищена</string>
+    <string name="toast_file_saved">Файл сохранён: %1s</string>
+    <string name="confirm_save_title">Сохранение и отправка</string>
+    <string name="confirm_save_msg">Сохранить таблицу в Excel-совместимый файл и открыть окно отправки?</string>
+    <string name="confirm_clear_title">Очистить таблицу</string>
+    <string name="confirm_clear_msg">Сбросить все значения таблицы к значениям по умолчанию?</string>
 </resources>

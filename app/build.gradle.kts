@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.powerm3_108"
+    namespace = "ru.zoolbazuzu.powerm3_108"
     compileSdk {
         version = release(36) {
             minorApiLevel = 1
@@ -11,11 +11,11 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.powerm3_108"
+        applicationId = "ru.zoolbazuzu.powerm3_108"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

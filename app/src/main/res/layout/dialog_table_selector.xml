@@ -9,13 +9,17 @@
         android:id="@+id/btnAddNewTable"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="+ Добавить новый"
-        android:textAllCaps="false" />
+        android:background="@drawable/ripple_btn_main"
+        android:text="@string/dlg_add_new"
+        android:textAllCaps="false"
+        android:textColor="@color/text_on_accent"
+        android:textStyle="bold" />
 
     <ListView
         android:id="@+id/listViewTables"
         android:layout_width="match_parent"
         android:layout_height="400dp"
         android:layout_marginTop="12dp"
-        android:dividerHeight="8dp" />
+        android:divider="@color/stroke_subtle"
+        android:dividerHeight="1dp" />
 </LinearLayout>
