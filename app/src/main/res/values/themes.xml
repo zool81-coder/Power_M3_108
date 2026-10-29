@@ -14,7 +14,7 @@
 
         <item name="android:statusBarColor">@color/bg_primary</item>
         <item name="android:navigationBarColor">@color/bg_primary</item>
-        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightStatusBar">true</item>
 
         <item name="android:textColorPrimary">@color/text_primary</item>
         <item name="android:textColorSecondary">@color/text_secondary</item>
@@ -22,8 +22,7 @@
 
     <style name="Theme.PowerM3108" parent="Base.Theme.PowerM3108" />
 
-    <!-- Тёмная тема для диалогов (не зависит от системной темы) -->
-    <style name="Theme.PowerM3108.Dialog" parent="ThemeOverlay.Material3.Dark">
+    <style name="Theme.PowerM3108.Dialog" parent="Theme.Material3.Light.Dialog.Alert">
         <item name="colorSurface">@color/surface_panel</item>
         <item name="colorOnSurface">@color/text_primary</item>
         <item name="colorPrimary">@color/accent_cyan</item>

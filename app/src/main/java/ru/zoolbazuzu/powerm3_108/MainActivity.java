@@ -24,13 +24,17 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.content.FileProvider;
+
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+
+import com.google.android.material.checkbox.MaterialCheckBox;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 
 import java.io.File;
 import java.text.DecimalFormat;
@@ -53,9 +57,9 @@ public class MainActivity extends AppCompatActivity {
     private Button btn_reading_down_coarse, btn_reading_down_fine, btn_reading_up_fine, btn_reading_up_coarse;
     private TextView btn_q_preset;
 
-    // --- Режимы калькулятора ---
-    private static final String MODE_KIU = "kiu"; // Q=16, префикс "КИУ", коэфф 2.5
-    private static final String MODE_UV  = "uv";  // Q=10, префикс "УВ",  коэфф 0.121
+    // --- Режимы ---
+    private static final String MODE_KIU = "kiu";
+    private static final String MODE_UV  = "uv";
     private static final String[] ALL_MODES = {MODE_KIU, MODE_UV};
 
     private static final double Q_KIU = 16.0;
@@ -74,6 +78,12 @@ public class MainActivity extends AppCompatActivity {
     private static final String KEY_CURRENT_TABLE_NUMBER = "current_table_number";
     private static final String KEY_ACTIVE_ROW = "active_row";
     private static final String KEY_MODE = "mode_table_";
+    private static final String KEY_THEME = "theme";
+    private static final String KEY_PROTECT_COEFF = "protect_coeff";
+    private static final String KEY_DEFAULT_Q_KIU = "default_q_kiu";
+    private static final String KEY_DEFAULT_Q_UV = "default_q_uv";
+    private static final String KEY_DEFAULT_COEFF_KIU = "default_coeff_kiu";
+    private static final String KEY_DEFAULT_COEFF_UV = "default_coeff_uv";
 
     // --- Данные ---
     private final RowData[] rowsData = new RowData[ROW_COUNT];
@@ -82,7 +92,6 @@ public class MainActivity extends AppCompatActivity {
     private String currentTableNumber = "1";
     private String currentMode = MODE_KIU;
 
-    // --- Ячейки таблицы ---
     private final EditText[] coeffEdits = new EditText[ROW_COUNT];
     private final EditText[] xEdits = new EditText[ROW_COUNT];
     private final TextView[] resultXViews = new TextView[ROW_COUNT];
@@ -100,25 +109,54 @@ public class MainActivity extends AppCompatActivity {
         double resultY = 0.0;
     }
 
-    // ============ Режим (helpers) ============
+    // ============ Режимы (helpers) ============
 
     private String prefixFor(String mode) { return MODE_UV.equals(mode) ? "УВ" : "КИУ"; }
-    private double defaultCoeffFor(String mode) { return MODE_UV.equals(mode) ? DEFAULT_COEFF_UV : DEFAULT_COEFF_KIU; }
-    private double qFor(String mode) { return MODE_UV.equals(mode) ? Q_UV : Q_KIU; }
-
-    private String buildTableTitle(String tableNumber) {
-        return prefixFor(getStoredMode(tableNumber)) + " № " + tableNumber;
-    }
 
     private String getStoredMode(String tableNumber) {
         return getSharedPreferences(PREFS_NAME, MODE_PRIVATE).getString(KEY_MODE + tableNumber, MODE_KIU);
     }
 
+    private String buildTableTitle(String tableNumber) {
+        return prefixFor(getStoredMode(tableNumber)) + " № " + tableNumber;
+    }
+
+    private double defaultCoeffFor(String mode) {
+        String key = MODE_UV.equals(mode) ? KEY_DEFAULT_COEFF_UV : KEY_DEFAULT_COEFF_KIU;
+        double fallback = MODE_UV.equals(mode) ? DEFAULT_COEFF_UV : DEFAULT_COEFF_KIU;
+        return Double.longBitsToDouble(getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                .getLong(key, Double.doubleToLongBits(fallback)));
+    }
+
+    // ============ Тема и настройки ============
+
+    private boolean isDarkTheme() {
+        return !"light".equals(getSharedPreferences(PREFS_NAME, MODE_PRIVATE).getString(KEY_THEME, "dark"));
+    }
+
+    private void applyTheme() {
+        AppCompatDelegate.setDefaultNightMode(
+                isDarkTheme() ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
+    }
+
+    private boolean isCoeffProtectionOn() {
+        return getSharedPreferences(PREFS_NAME, MODE_PRIVATE).getBoolean(KEY_PROTECT_COEFF, true);
+    }
+
+    private double getDefaultQFor(String mode) {
+        String key = MODE_UV.equals(mode) ? KEY_DEFAULT_Q_UV : KEY_DEFAULT_Q_KIU;
+        double fallback = MODE_UV.equals(mode) ? Q_UV : Q_KIU;
+        return Double.longBitsToDouble(getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                .getLong(key, Double.doubleToLongBits(fallback)));
+    }
+
+    private double qFor(String mode) { return getDefaultQFor(mode); }
+
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        applyTheme();
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
         resultTextView = findViewById(R.id.resultTextView);
@@ -169,12 +207,15 @@ public class MainActivity extends AppCompatActivity {
         btn_reading_up_coarse.setOnClickListener(v -> { haptic(); stepReading(STEP_COARSE, 1); });
         btn_q_preset.setOnClickListener(v -> { haptic(); toggleMode(); });
 
+        findViewById(R.id.btn_settings).setOnClickListener(v -> showSettingsDialog());
+
         if (tableTitleBar != null) tableTitleBar.setOnClickListener(v -> showTableManagerDialog());
         if (tableTitle != null) tableTitle.setOnClickListener(v -> showTableManagerDialog());
 
         btnSaveSend.setOnClickListener(v -> confirmSaveAndShare());
         btnClearTable.setOnClickListener(v -> confirmClearTable());
 
+        // Отступы под статус-бар и навигационную панель (клавиатуру не трогаем)
         View mainView = findViewById(R.id.main);
         if (mainView != null) {
             ViewCompat.setOnApplyWindowInsetsListener(mainView, (v, insets) -> {
@@ -242,7 +283,7 @@ public class MainActivity extends AppCompatActivity {
     private String getDutyKey(String t, String mode) { return "duty_table_" + t + "_" + mode; }
     private String getNumOffsetKey(String t) { return "num_offset_table_" + t; }
 
-    // ============ Таблица (построение) ============
+    // ============ Таблица ============
 
     private void buildTable() {
         if (tableContainer == null) return;
@@ -279,16 +320,31 @@ public class MainActivity extends AppCompatActivity {
             numberViews[i].setOnClickListener(v -> selectRow(index));
             row.addView(numberViews[i]);
 
+            // Коэффициент — инлайн-редактирование
             coeffEdits[i] = createEditCell(editBg, editText);
             coeffEdits[i].setLayoutParams(cellLp());
             coeffEdits[i].setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_NUMBER_FLAG_SIGNED);
             coeffEdits[i].setOnClickListener(v -> selectRow(index));
-            coeffEdits[i].setOnFocusChangeListener((v, has) -> { if (has) selectRow(index); });
+            coeffEdits[i].setOnFocusChangeListener((v, has) -> {
+                if (has) { selectRow(index); }
+                else { normalizeCoeffField(index); }
+            });
             coeffEdits[i].addTextChangedListener(new TextWatcher() {
                 @Override public void beforeTextChanged(CharSequence s, int a, int b, int c) {}
                 @Override public void afterTextChanged(Editable s) {}
-                @Override public void onTextChanged(CharSequence s, int a, int b, int c) {
+                @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
                     if (isInternalUpdate) return;
+
+                    if (isCoeffProtectionOn() && count > before) {
+                        String formatted = formatCoeff(s.toString());
+                        if (!formatted.equals(s.toString())) {
+                            isInternalUpdate = true;
+                            coeffEdits[index].setText(formatted);
+                            coeffEdits[index].setSelection(formatted.length());
+                            isInternalUpdate = false;
+                        }
+                    }
+
                     rowsData[index].coeff = getDoubleFromEditText(coeffEdits[index], defaultCoeffFor(currentMode));
                     updateRowCalculation(index);
                     if (index == activeRowIndex) updateMainCalculation();
@@ -297,16 +353,31 @@ public class MainActivity extends AppCompatActivity {
             });
             row.addView(coeffEdits[i]);
 
+            // Показание (М3-108) — инлайн-редактирование
             xEdits[i] = createEditCell(editBg, meterText);
             xEdits[i].setLayoutParams(cellLp());
             xEdits[i].setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
             xEdits[i].setOnClickListener(v -> selectRow(index));
-            xEdits[i].setOnFocusChangeListener((v, has) -> { if (has) selectRow(index); });
+            xEdits[i].setOnFocusChangeListener((v, has) -> {
+                if (has) { selectRow(index); }
+                else { normalizeReadingField(index); }
+            });
             xEdits[i].addTextChangedListener(new TextWatcher() {
                 @Override public void beforeTextChanged(CharSequence s, int a, int b, int c) {}
                 @Override public void afterTextChanged(Editable s) {}
-                @Override public void onTextChanged(CharSequence s, int a, int b, int c) {
+                @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
                     if (isInternalUpdate) return;
+
+                    if (isCoeffProtectionOn() && count > before) {
+                        String formatted = formatReading(s.toString());
+                        if (!formatted.equals(s.toString())) {
+                            isInternalUpdate = true;
+                            xEdits[index].setText(formatted);
+                            xEdits[index].setSelection(formatted.length());
+                            isInternalUpdate = false;
+                        }
+                    }
+
                     rowsData[index].xValue = getDoubleFromEditText(xEdits[index], DEFAULT_X);
                     updateRowCalculation(index);
                     if (index == activeRowIndex) updateMainCalculation();
@@ -472,7 +543,6 @@ public class MainActivity extends AppCompatActivity {
         saveState();
     }
 
-    /** Шаг изменения показания прибора (табло). */
     private void stepReading(double delta, int decimals) {
         double next = PowerCalculator.roundTo(rowsData[activeRowIndex].xValue + delta, decimals);
         if (next < 0) next = 0;
@@ -489,13 +559,11 @@ public class MainActivity extends AppCompatActivity {
         saveState();
     }
 
-    /** Переключение режима калькулятора: КИУ (Q=16) ⇄ УВ (Q=10). */
     private void toggleMode() {
         saveState();
         currentMode = MODE_UV.equals(currentMode) ? MODE_KIU : MODE_UV;
         loadTableDataForCurrentTable();
         if (tableTitle != null) {
-            // Берём префикс напрямую из нового currentMode, а не из prefs
             tableTitle.setText(prefixFor(currentMode) + " № " + currentTableNumber);
         }
         fillViewsFromData();
@@ -532,6 +600,145 @@ public class MainActivity extends AppCompatActivity {
             if (!result.matches("\\d{0,6}(\\.\\d{0,1})?")) return "";
             return null;
         }
+    }
+
+    /** Формат "D.dd(d)": первая цифра + точка + остальные (макс maxUserDigits). */
+    private String formatDotted(String raw, int maxUserDigits) {
+        String digits = raw.replaceAll("[^0-9]", "");
+        if (digits.length() > maxUserDigits) {
+            digits = digits.substring(0, maxUserDigits);
+            toast(R.string.toast_coeff_protected);
+        }
+        if (digits.isEmpty()) return "";
+        if (digits.length() == 1) return digits + ".";
+        return digits.charAt(0) + "." + digits.substring(1);
+    }
+
+    /** Коэффициент в режиме УВ: фиксированный "0." + до 3 цифр. */
+    private String formatCoeffUv(String raw) {
+        String digits = raw.replaceAll("[^0-9]", "");
+        String userDigits = digits.startsWith("0") ? digits.substring(1) : digits;
+        if (userDigits.length() > 3) {
+            userDigits = userDigits.substring(0, 3);
+            toast(R.string.toast_coeff_protected);
+        }
+        if (userDigits.isEmpty()) return "";
+        return "0." + userDigits;
+    }
+
+    /** Коэффициент: КИУ -> D.ddd, УВ -> 0.ddd */
+    private String formatCoeff(String raw) {
+        if (MODE_UV.equals(currentMode)) return formatCoeffUv(raw);
+        return formatDotted(raw, 4);
+    }
+
+    /** Показание прибора: D.dd */
+    private String formatReading(String raw) {
+        return formatDotted(raw, 3);
+    }
+
+    /** При потере фокуса: пусто/0 -> значение по умолчанию, иначе дополняем до формата. */
+    private void normalizeCoeffField(int index) {
+        if (index < 0 || index >= ROW_COUNT || coeffEdits[index] == null) return;
+        EditText e = coeffEdits[index];
+        String raw = e.getText().toString().trim().replace(",", ".");
+        double val = 0;
+        boolean valid = false;
+        if (!raw.isEmpty()) {
+            try { val = Double.parseDouble(raw); valid = true; } catch (Exception ignored) {}
+        }
+        if (!valid || val == 0) val = defaultCoeffFor(currentMode);
+
+        isInternalUpdate = true;
+        e.setText(formatCoeff3(val));
+        isInternalUpdate = false;
+
+        rowsData[index].coeff = val;
+        updateRowCalculation(index);
+        if (index == activeRowIndex) updateMainCalculation();
+        saveState();
+    }
+
+    /** При потере фокуса: пусто/0 -> DEFAULT_X, иначе дополняем до D.dd. */
+    private void normalizeReadingField(int index) {
+        if (index < 0 || index >= ROW_COUNT || xEdits[index] == null) return;
+        EditText e = xEdits[index];
+        String raw = e.getText().toString().trim().replace(",", ".");
+        double val = 0;
+        boolean valid = false;
+        if (!raw.isEmpty()) {
+            try { val = Double.parseDouble(raw); valid = true; } catch (Exception ignored) {}
+        }
+        if (!valid || val == 0) val = DEFAULT_X;
+
+        isInternalUpdate = true;
+        e.setText(displayDf.format(val));
+        isInternalUpdate = false;
+
+        rowsData[index].xValue = val;
+        updateRowCalculation(index);
+        if (index == activeRowIndex) updateMainCalculation();
+        saveState();
+    }
+
+    // ============ Настройки ============
+
+    private void showSettingsDialog() {
+        View v = getLayoutInflater().inflate(R.layout.dialog_settings, null);
+        final SwitchMaterial switchTheme = v.findViewById(R.id.switch_theme);
+        final MaterialCheckBox checkProtect = v.findViewById(R.id.check_protect);
+        final EditText etQKiu = v.findViewById(R.id.et_q_kiu);
+        final EditText etCoeffKiu = v.findViewById(R.id.et_coeff_kiu);
+        final EditText etQUv = v.findViewById(R.id.et_q_uv);
+        final EditText etCoeffUv = v.findViewById(R.id.et_coeff_uv);
+
+        final SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        final boolean wasDark = isDarkTheme();
+
+        switchTheme.setChecked(wasDark);
+        checkProtect.setChecked(isCoeffProtectionOn());
+        etQKiu.setText(df.format(getDefaultQFor(MODE_KIU)));
+        etCoeffKiu.setText(formatCoeff3(defaultCoeffFor(MODE_KIU)));
+        etQUv.setText(df.format(getDefaultQFor(MODE_UV)));
+        etCoeffUv.setText(formatCoeff3(defaultCoeffFor(MODE_UV)));
+
+        new AlertDialog.Builder(this, R.style.Theme_PowerM3108_Dialog)
+                .setTitle(R.string.settings_title)
+                .setView(v)
+                .setPositiveButton(R.string.dlg_ok, (d, w) -> {
+                    boolean newDark = switchTheme.isChecked();
+                    boolean protect = checkProtect.isChecked();
+
+                    double qKiu = getDoubleFromEditText(etQKiu, -1);
+                    double qUv = getDoubleFromEditText(etQUv, -1);
+                    double coeffKiu = getDoubleFromEditText(etCoeffKiu, -1);
+                    double coeffUv = getDoubleFromEditText(etCoeffUv, -1);
+
+                    boolean invalid = false;
+                    if (qKiu <= 0) { qKiu = Q_KIU; invalid = true; }
+                    if (qUv <= 0) { qUv = Q_UV; invalid = true; }
+                    if (coeffKiu <= 0) { coeffKiu = DEFAULT_COEFF_KIU; invalid = true; }
+                    if (coeffUv <= 0) { coeffUv = DEFAULT_COEFF_UV; invalid = true; }
+
+                    SharedPreferences.Editor ed = prefs.edit();
+                    ed.putString(KEY_THEME, newDark ? "dark" : "light");
+                    ed.putBoolean(KEY_PROTECT_COEFF, protect);
+                    ed.putLong(KEY_DEFAULT_Q_KIU, Double.doubleToLongBits(qKiu));
+                    ed.putLong(KEY_DEFAULT_Q_UV, Double.doubleToLongBits(qUv));
+                    ed.putLong(KEY_DEFAULT_COEFF_KIU, Double.doubleToLongBits(coeffKiu));
+                    ed.putLong(KEY_DEFAULT_COEFF_UV, Double.doubleToLongBits(coeffUv));
+                    ed.apply();
+
+                    if (invalid) {
+                        toast(R.string.toast_settings_invalid);
+                    }
+
+                    if (newDark != wasDark) {
+                        recreate();
+                    }
+                })
+                .setNegativeButton(R.string.dlg_cancel, null)
+                .show();
     }
 
     // ============ Управление таблицами ============
@@ -597,15 +804,13 @@ public class MainActivity extends AppCompatActivity {
                     currentMode = MODE_KIU;
                     numberOffset = 0;
                     for (int i = 0; i < ROW_COUNT; i++) {
-                        rowsData[i].coeff = DEFAULT_COEFF_KIU;
+                        rowsData[i].coeff = defaultCoeffFor(MODE_KIU);
                         rowsData[i].xValue = DEFAULT_X;
                     }
                     if (tableTitle != null) tableTitle.setText(buildTableTitle(currentTableNumber));
 
-                    // ВАЖНО: сначала синхронизируем поля ввода с данными,
-                    // и только потом setQ (он пересчитывает по полям).
                     fillViewsFromData();
-                    setQ(Q_KIU);
+                    setQ(getDefaultQFor(MODE_KIU));
                     updateNumberViews();
                     saveState();
                 })
@@ -830,7 +1035,6 @@ public class MainActivity extends AppCompatActivity {
             html.append("<html><head><meta charset=\"UTF-8\"></head><body>");
             html.append("<table border='1' cellspacing='0' cellpadding='6' style='border-collapse:collapse; text-align:center; font-family:Arial;'>");
 
-            // 5 колонок: № Л | Коэфф. | М3-108 | Р среднее | Р импульс
             html.append("<tr><td colspan='5' style='font-size:16pt; font-weight:bold; background:#d9ead3;'>")
                     .append(escapeHtml(title)).append("</td></tr>");
             html.append("<tr><td style='font-weight:bold;'>Дата и время</td><td colspan='4'>")

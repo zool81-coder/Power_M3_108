@@ -17,7 +17,7 @@
         <item name="android:windowLightStatusBar">false</item>
     </style>
 
-    <style name="Theme.PowerM3108.Dialog" parent="ThemeOverlay.Material3.Dark">
+    <style name="Theme.PowerM3108.Dialog" parent="Theme.Material3.Dark.Dialog.Alert">
         <item name="colorSurface">@color/surface_panel</item>
         <item name="colorOnSurface">@color/text_primary</item>
         <item name="colorPrimary">@color/accent_cyan</item>
