@@ -1347,7 +1347,7 @@ public class MainActivity extends AppCompatActivity {
         private RectF hole;
         private float radius;
         private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-
+        private final Path path = new Path();
         SpotlightView(Context c) {
             super(c);
             paint.setColor(0xCC000000);
@@ -1361,13 +1361,13 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onDraw(Canvas canvas) {
-            Path p = new Path();
-            p.setFillType(Path.FillType.EVEN_ODD);
-            p.addRect(0, 0, getWidth(), getHeight(), Path.Direction.CW);
+            path.reset();
+            path.setFillType(Path.FillType.EVEN_ODD);
+            path.addRect(0, 0, getWidth(), getHeight(), Path.Direction.CW);
             if (hole != null) {
-                p.addRoundRect(hole, radius, radius, Path.Direction.CW);
+                path.addRoundRect(hole, radius, radius, Path.Direction.CW);
             }
-            canvas.drawPath(p, paint);
+            canvas.drawPath(path, paint);
         }
     }
 

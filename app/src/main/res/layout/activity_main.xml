@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/root_scroll"
     android:layout_width="match_parent"
@@ -60,12 +61,12 @@
 
             <ImageView
                 android:id="@+id/btn_settings"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:contentDescription="@string/settings_title"
                 android:padding="10dp"
                 android:src="@drawable/ic_settings"
-                android:tint="@color/text_secondary" />
+                app:tint="@color/text_secondary" />
 
         </LinearLayout>
 
@@ -397,6 +398,7 @@
                 android:id="@+id/tableTitleBar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:minHeight="48dp"
                 android:background="@drawable/bg_table_title"
                 android:clickable="true"
                 android:focusable="true"

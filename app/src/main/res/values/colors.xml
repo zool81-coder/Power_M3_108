@@ -27,7 +27,6 @@
     <color name="table_header_text">#0B2A3A</color>
     <color name="table_row_bg">#F7FAFE</color>
     <color name="table_row_active_bg">#CFE3F7</color>
-    <color name="table_row_active_bar">#00B8E6</color>
     <color name="table_value_meter">#A0243C</color>
     <color name="table_title_bg">#D3E7F5</color>
 
@@ -36,7 +35,4 @@
     <color name="stroke_red">#66C41E43</color>
     <color name="stroke_subtle">#334E6176</color>
 
-    <!-- Базовые -->
-    <color name="black">#000000</color>
-    <color name="white">#FFFFFF</color>
 </resources>
