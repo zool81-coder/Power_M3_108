@@ -13,16 +13,26 @@ import android.text.InputFilter;
 import android.text.InputType;
 import android.text.Spanned;
 import android.text.TextWatcher;
+import android.graphics.Typeface;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.ScrollView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.RectF;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -53,6 +63,8 @@ public class MainActivity extends AppCompatActivity {
     private TextView tableTitle;
     private EditText duty_cycle;
     private LinearLayout tableContainer;
+    private ScrollView scrollView;
+    private View tutorialSpacer;
 
     private Button btn_reading_down_coarse, btn_reading_down_fine, btn_reading_up_fine, btn_reading_up_coarse;
     private TextView btn_q_preset;
@@ -165,6 +177,8 @@ public class MainActivity extends AppCompatActivity {
         tableTitle = findViewById(R.id.tableTitle);
         duty_cycle = findViewById(R.id.duty_cycle);
         tableContainer = findViewById(R.id.table_container);
+        scrollView = findViewById(R.id.root_scroll);
+        tutorialSpacer = findViewById(R.id.tutorial_spacer);
 
         btn_reading_down_coarse = findViewById(R.id.btn_reading_down_coarse);
         btn_reading_down_fine = findViewById(R.id.btn_reading_down_fine);
@@ -691,6 +705,7 @@ public class MainActivity extends AppCompatActivity {
         final EditText etCoeffKiu = v.findViewById(R.id.et_coeff_kiu);
         final EditText etQUv = v.findViewById(R.id.et_q_uv);
         final EditText etCoeffUv = v.findViewById(R.id.et_coeff_uv);
+        final Button btnTutorial = v.findViewById(R.id.btn_tutorial);
 
         final SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         final boolean wasDark = isDarkTheme();
@@ -702,7 +717,7 @@ public class MainActivity extends AppCompatActivity {
         etQUv.setText(df.format(getDefaultQFor(MODE_UV)));
         etCoeffUv.setText(formatCoeff3(defaultCoeffFor(MODE_UV)));
 
-        new AlertDialog.Builder(this, R.style.Theme_PowerM3108_Dialog)
+        AlertDialog dialog = new AlertDialog.Builder(this, R.style.Theme_PowerM3108_Dialog)
                 .setTitle(R.string.settings_title)
                 .setView(v)
                 .setPositiveButton(R.string.dlg_ok, (d, w) -> {
@@ -738,7 +753,14 @@ public class MainActivity extends AppCompatActivity {
                     }
                 })
                 .setNegativeButton(R.string.dlg_cancel, null)
-                .show();
+                .create();
+
+        btnTutorial.setOnClickListener(vv -> {
+            dialog.dismiss();
+            startTutorial();
+        });
+        dialog.show();
+
     }
 
     // ============ Управление таблицами ============
@@ -1092,6 +1114,261 @@ public class MainActivity extends AppCompatActivity {
         if (s == null) return "";
         return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
                 .replace("\"", "&quot;").replace("'", "&#39;");
+    }
+
+    // ============ Обучающий курс ============
+    private static class TutorialStep {
+        final int viewId;
+        final String title;
+        final String desc;
+
+        TutorialStep(int viewId, String title, String desc) {
+            this.viewId = viewId;
+            this.title = title;
+            this.desc = desc;
+        }
+    }
+
+    private static final TutorialStep[] TUTORIAL_STEPS = {
+            new TutorialStep(R.id.panel_display,
+                    "Табло прибора М3-108",
+                    "Здесь отображается показание прибора. Значение можно менять кнопками ± в блоке ниже."),
+            new TutorialStep(R.id.panel_reading,
+                    "Показание прибора",
+                    "Кнопки «−» и «+» меняют показание. Грубо — шаг 0,1, точно — шаг 0,01."),
+            new TutorialStep(R.id.panel_powers,
+                    "Мощность",
+                    "P средняя — произведение коэффициента на показание. P импульс — умножение на скважность Q."),
+            new TutorialStep(R.id.panel_q,
+                    "Скважность Q",
+                    "Кнопка Q переключает режим КИУ (Q=16) и УВ (Q=10). Значение можно ввести вручную."),
+            new TutorialStep(R.id.table_card,
+                    "Таблица",
+                    "Шесть строк. Тап по «№ Л» переключает нумерацию 1–6 ⇄ 7–12. Тап по ячейке — редактирование."),
+            new TutorialStep(R.id.btnSaveSend,
+                    "Сохранение и отправка",
+                    "«Записать и отправить» сохраняет таблицу в файл и открывает окно отправки. «Очистить таблицу» сбрасывает значения."),
+            new TutorialStep(R.id.btn_settings,
+                    "Настройки",
+                    "Здесь — переключение темы, защита от неверного коэффициента и значения по умолчанию.")
+    };
+
+    private int tutorialStep = 0;
+
+    private FrameLayout tutorialOverlay;
+    private SpotlightView tutorialScrim;
+    private View tutorialHighlight;
+    private TextView tutorialTitleTv;
+    private TextView tutorialDescTv;
+    private Button tutorialBackBtn;
+    private Button tutorialStopBtn;
+    private Button tutorialNextBtn;
+
+    private void startTutorial() {
+        tutorialStep = 0;
+        if (tutorialSpacer != null) {
+            int spacerH = (int) (getResources().getDisplayMetrics().heightPixels * 0.6);
+            tutorialSpacer.getLayoutParams().height = spacerH;
+            tutorialSpacer.requestLayout();
+        }
+        buildTutorialOverlayOnce();
+        showTutorialStep();
+    }
+
+    /** Создаём оверлей один раз; дальше только обновляем его содержимое (без мерцания). */
+    private void buildTutorialOverlayOnce() {
+        if (tutorialOverlay != null) return;
+        ViewGroup root = findViewById(android.R.id.content);
+
+        FrameLayout overlay = new FrameLayout(this);
+        overlay.setLayoutParams(new ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        overlay.setClickable(true);
+
+        tutorialScrim = new SpotlightView(this);
+        overlay.addView(tutorialScrim, new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
+        tutorialHighlight = new View(this);
+        tutorialHighlight.setBackgroundResource(R.drawable.tutorial_highlight);
+        tutorialHighlight.setVisibility(View.INVISIBLE);
+        overlay.addView(tutorialHighlight, new FrameLayout.LayoutParams(0, 0));
+
+        // Карточка снизу
+        LinearLayout card = new LinearLayout(this);
+        card.setOrientation(LinearLayout.VERTICAL);
+        card.setBackgroundResource(R.drawable.bg_panel);
+        card.setPadding(dpToPx(20), dpToPx(20), dpToPx(20), dpToPx(20));
+
+        tutorialTitleTv = new TextView(this);
+        tutorialTitleTv.setTextColor(getColor(R.color.text_primary));
+        tutorialTitleTv.setTextSize(19f);
+        tutorialTitleTv.setTypeface(null, Typeface.BOLD);
+        card.addView(tutorialTitleTv);
+
+        tutorialDescTv = new TextView(this);
+        tutorialDescTv.setTextColor(getColor(R.color.text_primary));
+        tutorialDescTv.setTextSize(16f);
+        tutorialDescTv.setPadding(0, dpToPx(10), 0, dpToPx(16));
+        card.addView(tutorialDescTv);
+
+        LinearLayout btns = new LinearLayout(this);
+        btns.setOrientation(LinearLayout.HORIZONTAL);
+        btns.setGravity(Gravity.CENTER);
+
+        tutorialBackBtn = makeTutorialButton("Назад", false);
+        tutorialStopBtn = makeTutorialButton("Прервать", false);
+        tutorialNextBtn = makeTutorialButton("Далее", true);
+
+        tutorialBackBtn.setOnClickListener(v -> {
+            if (tutorialStep > 0) { tutorialStep--; showTutorialStep(); }
+        });
+        tutorialStopBtn.setOnClickListener(v -> removeTutorialOverlay());
+        tutorialNextBtn.setOnClickListener(v -> {
+            if (tutorialStep == TUTORIAL_STEPS.length - 1) { removeTutorialOverlay(); }
+            else { tutorialStep++; showTutorialStep(); }
+        });
+
+        LinearLayout.LayoutParams blp = new LinearLayout.LayoutParams(0,
+                ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+        blp.setMargins(dpToPx(4), 0, dpToPx(4), 0);
+        btns.addView(tutorialBackBtn, blp);
+        btns.addView(tutorialStopBtn, blp);
+        btns.addView(tutorialNextBtn, blp);
+        card.addView(btns);
+
+        // Отступ снизу под системные кнопки Android
+        int navBottom = 0;
+        WindowInsetsCompat wi = ViewCompat.getRootWindowInsets(root);
+        if (wi != null) {
+            navBottom = wi.getInsets(WindowInsetsCompat.Type.systemBars()).bottom;
+        }
+
+        FrameLayout.LayoutParams clp = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM);
+        clp.setMargins(dpToPx(12), 0, dpToPx(12), dpToPx(12) + navBottom);
+        overlay.addView(card, clp);
+
+        root.addView(overlay);
+        tutorialOverlay = overlay;
+    }
+
+    private void showTutorialStep() {
+        TutorialStep step = TUTORIAL_STEPS[tutorialStep];
+        View target = (step.viewId != 0) ? findViewById(step.viewId) : null;
+
+        if (target != null) scrollToView(target);
+
+        // Ждём завершения плавного скролла, затем обновляем подсветку и текст
+        new Handler(Looper.getMainLooper()).postDelayed(() ->
+                updateTutorialOverlay(target, step), 650);
+    }
+
+    private void scrollToView(View v) {
+        if (scrollView == null) return;
+        v.post(() -> {
+            int[] vl = new int[2];
+            int[] sl = new int[2];
+            v.getLocationInWindow(vl);
+            scrollView.getLocationInWindow(sl);
+            int rel = vl[1] - sl[1] + scrollView.getScrollY();
+            scrollView.smoothScrollTo(0, Math.max(0, rel - dpToPx(16)));
+        });
+    }
+
+    /** Обновляем уже созданный оверлей (позиция подсветки + текст карточки). */
+    private void updateTutorialOverlay(View target, TutorialStep step) {
+        if (tutorialOverlay == null) return;
+
+        if (target != null) {
+            int[] t = new int[2];
+            int[] o = new int[2];
+            target.getLocationInWindow(t);
+            tutorialOverlay.getLocationInWindow(o);
+            int left = t[0] - o[0];
+            int top = t[1] - o[1];
+            int w = target.getWidth();
+            int h = target.getHeight();
+
+            float pad = dpToPx(6);
+            tutorialScrim.setHole(new RectF(left - pad, top - pad, left + w + pad, top + h + pad), dpToPx(12));
+
+            FrameLayout.LayoutParams hlp = new FrameLayout.LayoutParams(
+                    w + dpToPx(12), h + dpToPx(12));
+            hlp.leftMargin = left - dpToPx(6);
+            hlp.topMargin = top - dpToPx(6);
+            tutorialHighlight.setLayoutParams(hlp);
+            tutorialHighlight.setVisibility(View.VISIBLE);
+        } else {
+            tutorialScrim.setHole(null, 0);
+            tutorialHighlight.setVisibility(View.INVISIBLE);
+        }
+
+        tutorialTitleTv.setText(step.title);
+        tutorialDescTv.setText(step.desc);
+
+        boolean last = (tutorialStep == TUTORIAL_STEPS.length - 1);
+        tutorialNextBtn.setText(last ? "Завершить" : "Далее");
+        tutorialBackBtn.setEnabled(tutorialStep > 0);
+        tutorialBackBtn.setAlpha(tutorialStep > 0 ? 1f : 0.5f);
+    }
+
+    private Button makeTutorialButton(String text, boolean primary) {
+        Button b = new Button(this);
+        b.setText(text);
+        b.setAllCaps(false);
+        b.setTextSize(13f);
+        b.setBackgroundResource(primary ? R.drawable.ripple_btn_main : R.drawable.ripple_btn_secondary);
+        b.setTextColor(primary ? getColor(R.color.text_on_accent) : getColor(R.color.text_secondary));
+        return b;
+    }
+
+    private void removeTutorialOverlay() {
+        if (tutorialOverlay != null) {
+            ViewGroup parent = (ViewGroup) tutorialOverlay.getParent();
+            if (parent != null) parent.removeView(tutorialOverlay);
+            tutorialOverlay = null;
+            tutorialScrim = null;
+            tutorialHighlight = null;
+            tutorialTitleTv = null;
+            tutorialDescTv = null;
+            tutorialBackBtn = null;
+            tutorialStopBtn = null;
+            tutorialNextBtn = null;
+        }
+        if (tutorialSpacer != null) {
+            tutorialSpacer.getLayoutParams().height = 0;
+            tutorialSpacer.requestLayout();
+        }
+    }
+
+    /** Затемнение с «дырой» вокруг целевого блока. */
+    private static class SpotlightView extends View {
+        private RectF hole;
+        private float radius;
+        private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+
+        SpotlightView(Context c) {
+            super(c);
+            paint.setColor(0xCC000000);
+        }
+
+        void setHole(RectF r, float rad) {
+            hole = r;
+            radius = rad;
+            invalidate();
+        }
+
+        @Override
+        protected void onDraw(Canvas canvas) {
+            Path p = new Path();
+            p.setFillType(Path.FillType.EVEN_ODD);
+            p.addRect(0, 0, getWidth(), getHeight(), Path.Direction.CW);
+            if (hole != null) {
+                p.addRoundRect(hole, radius, radius, Path.Direction.CW);
+            }
+            canvas.drawPath(p, paint);
+        }
     }
 
     // ============ Утилиты ============

@@ -71,6 +71,7 @@
 
         <!-- Табло прибора (красное) -->
         <LinearLayout
+            android:id="@+id/panel_display"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/bg_display_red"
@@ -119,6 +120,7 @@
 
         <!-- Управление показанием прибора -->
         <LinearLayout
+            android:id="@+id/panel_reading"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
@@ -207,6 +209,7 @@
 
         <!-- Мощности: P средняя / P импульс -->
         <LinearLayout
+            android:id="@+id/panel_powers"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
@@ -307,6 +310,7 @@
 
         <!-- Скважность Q -->
         <LinearLayout
+            android:id="@+id/panel_q"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
@@ -382,6 +386,7 @@
 
         <!-- Таблица -->
         <LinearLayout
+            android:id="@+id/table_card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
@@ -448,6 +453,11 @@
             android:textAllCaps="false"
             android:textColor="@color/text_secondary"
             android:textSize="14sp" />
+
+        <Space
+            android:id="@+id/tutorial_spacer"
+            android:layout_width="match_parent"
+            android:layout_height="0dp" />
 
     </LinearLayout>
 </ScrollView>

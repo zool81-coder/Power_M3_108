@@ -64,6 +64,7 @@
 
     <!-- Настройки -->
     <string name="settings_title">Настройки</string>
+    <string name="settings_tutorial">Обучающий курс</string>
     <string name="settings_theme">Тёмная тема</string>
     <string name="settings_protect">Защита от ввода неверного коэффициента</string>
     <string name="settings_q_kiu">Скважность по умолчанию (режим КИУ)</string>
